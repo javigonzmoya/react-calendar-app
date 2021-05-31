@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 //import ReactDOM from 'react-dom';
 import Modal from 'react-modal';
 import DateTimePicker from 'react-datetime-picker';
@@ -6,6 +6,7 @@ import moment from 'moment';
 import Swal from 'sweetalert2';
 import { useDispatch, useSelector } from 'react-redux';
 import { closeModal } from '../../actions/ui';
+import { eventAddNew, eventClearActivateEvent } from '../../actions/events';
 
 const customStyles = {
   content: {
@@ -22,22 +23,30 @@ Modal.setAppElement('#root');
 
 const now = moment().minute(0).seconds(0).add(1, 'hours');
 const nowEnd = now.clone().add(1, 'hours');
+const initFormValues = {
+  title: 'Event',
+  notes: '',
+  start: now.toDate(),
+  end: nowEnd.toDate(),
+};
 
 export const CalendarModal = () => {
   const dispatch = useDispatch();
 
   const [dateStart, setDateStart] = useState(now.toDate());
   const [dateEnd, setDateEnd] = useState(nowEnd.toDate());
-  const [formValues, setFormValues] = useState({
-    title: 'Event',
-    notes: '',
-    start: now.toDate(),
-    end: nowEnd.toDate(),
-  });
+  const [formValues, setFormValues] = useState(initFormValues);
   const [titleIsValid, setTitleIsValid] = useState(true);
   const { modalOpen } = useSelector((state) => state.ui);
+  const { activeEvent } = useSelector((state) => state.calendar);
 
   const { title, notes, start, end } = formValues;
+
+  useEffect(() => {
+    if (activeEvent) {
+      setFormValues(activeEvent);
+    }
+  }, [activeEvent, setFormValues]);
 
   const handleInputChange = ({ target }) => {
     setFormValues({
@@ -62,6 +71,17 @@ export const CalendarModal = () => {
       setTitleIsValid(false);
       return;
     }
+
+    dispatch(
+      eventAddNew({
+        ...formValues,
+        id: new Date().getTime(),
+        user: {
+          _id: '123',
+          name: 'javier',
+        },
+      })
+    );
 
     //TODO: Realizar grabacion en DB
 
@@ -88,6 +108,8 @@ export const CalendarModal = () => {
 
   const handleCloseModal = () => {
     dispatch(closeModal());
+    setFormValues(initFormValues);
+    dispatch(eventClearActivateEvent());
   };
   return (
     <div>

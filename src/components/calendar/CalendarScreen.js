@@ -10,14 +10,16 @@ import { CalendarModal } from './CalendarModal';
 
 import 'moment/locale/es';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { openModal } from '../../actions/ui';
+import { eventSetActivate } from '../../actions/events';
+import { AddNewFab } from '../ui/AddNewFab';
 
 moment.locale('es');
 
 const localizer = momentLocalizer(moment);
 
-const myEventsList = [
+/* const myEventsList = [
   {
     title: 'cumpleaños del jefe',
     start: moment().toDate(),
@@ -29,9 +31,11 @@ const myEventsList = [
       name: 'Javi',
     },
   },
-];
+]; */
 
 export const CalendarScreen = () => {
+  const { events } = useSelector((state) => state.calendar);
+
   const [lastView, setLastView] = useState(
     localStorage.getItem('lastView') || 'month'
   );
@@ -42,7 +46,7 @@ export const CalendarScreen = () => {
   };
 
   const handleOnSelectEvent = (e) => {
-    console.log(e);
+    dispatch(eventSetActivate(e));
   };
 
   const handleOnView = (e) => {
@@ -69,7 +73,7 @@ export const CalendarScreen = () => {
 
       <Calendar
         localizer={localizer}
-        events={myEventsList}
+        events={events}
         startAccessor="start"
         endAccessor="end"
         messages={messages}
@@ -82,6 +86,8 @@ export const CalendarScreen = () => {
           event: CalendarEvent,
         }}
       />
+
+      <AddNewFab />
 
       <CalendarModal />
     </div>
