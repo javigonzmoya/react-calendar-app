@@ -6,7 +6,11 @@ import moment from 'moment';
 import Swal from 'sweetalert2';
 import { useDispatch, useSelector } from 'react-redux';
 import { closeModal } from '../../actions/ui';
-import { eventAddNew, eventClearActivateEvent } from '../../actions/events';
+import {
+  eventAddNew,
+  eventClearActivateEvent,
+  eventUpdated,
+} from '../../actions/events';
 
 const customStyles = {
   content: {
@@ -45,6 +49,8 @@ export const CalendarModal = () => {
   useEffect(() => {
     if (activeEvent) {
       setFormValues(activeEvent);
+    } else {
+      setFormValues(initFormValues);
     }
   }, [activeEvent, setFormValues]);
 
@@ -72,16 +78,20 @@ export const CalendarModal = () => {
       return;
     }
 
-    dispatch(
-      eventAddNew({
-        ...formValues,
-        id: new Date().getTime(),
-        user: {
-          _id: '123',
-          name: 'javier',
-        },
-      })
-    );
+    if (activeEvent) {
+      dispatch(eventUpdated(formValues));
+    } else {
+      dispatch(
+        eventAddNew({
+          ...formValues,
+          id: new Date().getTime(),
+          user: {
+            _id: '123',
+            name: 'javier',
+          },
+        })
+      );
+    }
 
     //TODO: Realizar grabacion en DB
 
@@ -122,7 +132,7 @@ export const CalendarModal = () => {
         style={customStyles}
         closeTimeoutMS={200}
       >
-        <h1> Nuevo evento </h1>
+        <h1>{activeEvent ? 'Editar Evento' : 'Nuevo evento'}</h1>
         <hr />
         <form onSubmit={handleSubmit} className="container">
           <div className="form-group">
