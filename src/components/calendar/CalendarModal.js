@@ -7,9 +7,9 @@ import Swal from 'sweetalert2';
 import { useDispatch, useSelector } from 'react-redux';
 import { closeModal } from '../../actions/ui';
 import {
-  eventAddNew,
+  eventStartAddNew,
   eventClearActivateEvent,
-  eventUpdated,
+  eventsStartUpdated,
 } from '../../actions/events';
 
 const customStyles = {
@@ -37,8 +37,6 @@ const initFormValues = {
 export const CalendarModal = () => {
   const dispatch = useDispatch();
 
-  const [dateStart, setDateStart] = useState(now.toDate());
-  const [dateEnd, setDateEnd] = useState(nowEnd.toDate());
   const [formValues, setFormValues] = useState(initFormValues);
   const [titleIsValid, setTitleIsValid] = useState(true);
   const { modalOpen } = useSelector((state) => state.ui);
@@ -79,29 +77,16 @@ export const CalendarModal = () => {
     }
 
     if (activeEvent) {
-      dispatch(eventUpdated(formValues));
+      dispatch(eventsStartUpdated(formValues));
     } else {
-      dispatch(
-        eventAddNew({
-          ...formValues,
-          id: new Date().getTime(),
-          user: {
-            _id: '123',
-            name: 'javier',
-          },
-        })
-      );
+      dispatch(eventStartAddNew(formValues));
     }
 
-    //TODO: Realizar grabacion en DB
-
     setTitleIsValid(true);
-    console.log('Todo ok');
     dispatch(closeModal());
   };
 
   const HandleStartDateOnChange = (e) => {
-    setDateStart(e);
     setFormValues({
       ...formValues,
       start: e,
@@ -109,7 +94,6 @@ export const CalendarModal = () => {
   };
 
   const HandleEndDateOnChange = (e) => {
-    setDateEnd(e);
     setFormValues({
       ...formValues,
       end: e,
@@ -139,7 +123,7 @@ export const CalendarModal = () => {
             <label>Fecha y hora inicio</label>
             <DateTimePicker
               onChange={HandleStartDateOnChange}
-              value={dateStart}
+              value={start}
               className="form-control"
             />
           </div>
@@ -148,8 +132,8 @@ export const CalendarModal = () => {
             <label>Fecha y hora fin</label>
             <DateTimePicker
               onChange={HandleEndDateOnChange}
-              minDate={dateStart}
-              value={dateEnd}
+              minDate={start}
+              value={end}
               className="form-control"
             />
           </div>
